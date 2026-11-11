@@ -9,5 +9,5 @@ window.CONFIG = {
   // Review mode for Svetlana: add ?review=1 to the link to show the "remark" button.
   reviewParam: "review",
   // Telegram username (without @) who receives review remarks; empty = share sheet.
-  reviewTo: "",
+  reviewTo: "Irena_nia",
 };
