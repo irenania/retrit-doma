@@ -138,7 +138,11 @@
     h += d ? '<button class="btn btn-done" data-done="' + esc(id) + '">' + I.check + 'Пройдено</button>'
            : '<button class="btn btn-primary" data-done="' + esc(id) + '">Урок пройден</button>';
     if (next) h += '<a class="btn btn-ghost" href="#/l/' + encodeURIComponent(next.id) + '">Следующий: ' + esc(next.num) + ' ' + I.chev.replace('#5B6468', 'currentColor') + '</a>';
-    if (REVIEW) h += '<button class="btn review" data-remark="' + esc(id) + '">' + I.pen + 'Замечание по уроку</button>';
+    if (REVIEW) h += '<button class="btn review" data-remark="' + esc(id) + '">' + I.pen + 'Замечание по уроку</button>' +
+      '<div class="remark-form" id="remark" hidden>' +
+        '<label for="rm-min">На какой минуте (если важно)</label><input id="rm-min" inputmode="numeric" placeholder="например, 3:40">' +
+        '<label for="rm-text">Что не так, что поправить</label><textarea id="rm-text" placeholder="Напишите замечание"></textarea>' +
+        '<button class="btn btn-primary" data-send="' + esc(id) + '">Отправить замечание</button></div>';
     return h + '</div>';
   }
 
@@ -162,14 +166,26 @@
   }
 
   app.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-go],[data-done],[data-remark]");
+    var t = e.target.closest("[data-go],[data-done],[data-remark],[data-send]");
     if (!t) return;
     if (t.dataset.go === "start") { state.seen = true; save(); location.hash = "#/"; render(); }
-    if (t.dataset.done) { var id = t.dataset.done; state.done[id] = !state.done[id]; save(); render(); }
+    if (t.dataset.done) {
+      var id = t.dataset.done, l0 = byId(id), nx = LESSONS[LESSONS.indexOf(l0) + 1];
+      state.done[id] = !state.done[id]; save();
+      // Marking a lesson as done moves straight on to the next one.
+      if (state.done[id] && nx) location.hash = "#/l/" + encodeURIComponent(nx.id); else render();
+    }
     if (t.dataset.remark) {
-      var l = byId(t.dataset.remark);
-      var text = "Замечание по уроку " + l.num + " «" + l.title + "»\nМинута: \nЧто поправить: ";
-      var url = "https://t.me/share/url?url=" + encodeURIComponent(" ") + "&text=" + encodeURIComponent(text);
+      var f = document.getElementById("remark"); f.hidden = !f.hidden;
+      if (!f.hidden) { f.scrollIntoView({ behavior: "smooth", block: "center" }); document.getElementById("rm-text").focus(); }
+    }
+    if (t.dataset.send) {
+      var l = byId(t.dataset.send), min = document.getElementById("rm-min").value.trim(), txt = document.getElementById("rm-text").value.trim();
+      if (!txt) { document.getElementById("rm-text").focus(); return; }
+      var text = "Замечание по уроку " + l.num + " «" + l.title + "»" + (min ? "\nМинута: " + min : "") + "\n" + txt;
+      // Goes straight to the reviewer's chat if CONFIG.reviewTo is set, otherwise to the share sheet.
+      var url = CFG.reviewTo ? "https://t.me/" + CFG.reviewTo + "?text=" + encodeURIComponent(text)
+                             : "https://t.me/share/url?url=" + encodeURIComponent(" ") + "&text=" + encodeURIComponent(text);
       if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
     }
   });
