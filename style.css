@@ -57,8 +57,8 @@ button, a.btn, a.row { font: inherit; cursor: pointer; text-decoration: none; }
 }
 .badge.done { background: var(--accent); }
 .badge.ring { background: transparent; border: 2px solid #9AA5A2; color: var(--ink-2); font-size: 15px; }
-/* Player box keeps the video's own 9:16 shape: it is as tall as the screen allows and the width follows, so VK draws no black side bars. */
-.player { position: relative; width: min(100%, calc(86vh * 9 / 16)); width: min(100%, calc(86dvh * 9 / 16)); aspect-ratio: 9 / 16; margin: 0 auto; border-radius: 20px; overflow: hidden; background: var(--ink); }
+/* Player box keeps the video's own 9:16 shape: it is as tall as the smallest screen height allows (svh: does not change when the browser bar hides, so the page does not jump) and the width follows, so VK draws no black side bars. */
+.player { position: relative; width: min(100%, calc(84vh * 9 / 16)); width: min(100%, calc(84svh * 9 / 16)); aspect-ratio: 9 / 16; margin: 0 auto; border-radius: 20px; overflow: hidden; background: var(--ink); }
 .player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .player .empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #C9D2D0; padding: 24px; text-align: center; font-size: 16px; }
 .task { background: var(--task); border-radius: 18px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
@@ -69,3 +69,9 @@ button, a.btn, a.row { font: inherit; cursor: pointer; text-decoration: none; }
 .review { background: #FFF6E0; border: 2px dashed #C99A2E; color: #6B4E0F; }
 svg { flex: none; }
 .audio-card audio { width: 100%; height: 54px; }
+.remark-form { display: flex; flex-direction: column; gap: 10px; background: #FFF6E0; border: 2px dashed #C99A2E; border-radius: 18px; padding: 14px; }
+.remark-form label { font-size: 15px; font-weight: 700; color: #6B4E0F; }
+.remark-form input, .remark-form textarea { font: inherit; font-size: 17px; border: 1px solid #D9C48F; border-radius: 12px; padding: 10px 12px; background: #fff; color: var(--ink); width: 100%; }
+.remark-form textarea { min-height: 110px; resize: vertical; }
+.remark-form .btn { min-height: 52px; }
+.note-saved { font-size: 15px; color: #6B4E0F; }
