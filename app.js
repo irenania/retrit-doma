@@ -58,17 +58,27 @@
   };
 
   // ---------- screens ----------
-  function welcome() {
-    return '<div class="stack-lg" style="min-height:90vh;padding-top:24px">' +
-      '<div class="stack"><div class="eyebrow">Онлайн-ретрит</div><h1 style="font-size:38px">Ретрит дома.<br>Белые скалы</h1>' +
-      '<p style="font-size:19px;color:var(--ink-2)">Пять дней ретрита Светланы Киричук и Анатолия — в вашем темпе, из дома.</p></div>' +
-      '<div class="stack">' +
+  // Intro: what the retreat is, who leads it, how to go through it.
+  function intro(withStart) {
+    var nm = C.modules.filter(function (m) { return !m.bonus; }).length, nl = mainLessons().length,
+        mins = LESSONS.reduce(function (a, l) { return a + l.min; }, 0);
+    return '<div class="stack-lg" style="padding-top:24px">' +
+      (withStart ? '' : '<a class="btn btn-ghost back" href="#/">' + I.back + 'На главную</a>') +
+      '<div class="stack"><div class="eyebrow">Онлайн-ретрит · Светлана Киричук и Анатолий</div>' +
+      '<h1 style="font-size:38px">7 шагов к любви</h1>' +
+      '<p style="font-size:20px;font-weight:700;color:var(--accent)">Ретрит дома</p>' +
+      '<p style="font-size:19px;color:var(--ink-2)">Пять дней и семь последовательных шагов к собственной опоре: что для меня любовь, чего хочу именно я, какая жизнь мне хороша. Когда есть своя опора, отношения перестают быть местом, где держишься из последних сил.</p></div>' +
+      '<div class="card stack" style="gap:8px">' +
+      '<p>Светлана ведёт психологическую часть, Анатолий — работу с телом и состоянием. Найденное в разговоре сразу закрепляется в теле.</p>' +
+      '<p class="muted">Всё записано на живом ретрите в октябре 2026 года — в предгорьях Кавказа, у горной реки. Вы проходите его дома, в своём темпе.</p>' +
+      '<p class="muted">Внутри: ' + nm + ' ' + plural(nm, "модуль", "модуля", "модулей") + ', ' + nl + ' ' + plural(nl, "урок", "урока", "уроков") + ', практики и бонусы — около ' + Math.round(mins / 60) + ' часов.</p></div>' +
+      '<div class="stack"><h2>Как проходить</h2>' +
       step(1, "Заведите тетрадь самонаблюдения — в уроках будут вопросы.") +
       step(2, "Один модуль — один вечер. Каждый урок можно смотреть или слушать.") +
       step(3, "Отмечайте пройденное — мы запомним, где вы остановились.") +
-      '</div><div style="flex:1"></div>' +
-      '<button class="btn btn-primary" data-go="start">Начать</button></div>';
+      '</div>' + (withStart ? '<button class="btn btn-primary" data-go="start">Начать</button>' : '') + '</div>';
   }
+  function welcome() { return intro(true); }
   function step(n, t) { return '<div class="step"><div class="badge">' + n + '</div><div>' + esc(t) + '</div></div>'; }
 
   function home() {
@@ -78,7 +88,7 @@
     // continue: the last opened lesson if unfinished, otherwise the next unfinished one after it
     var start = Math.max(0, main.indexOf(byId(state.last)));
     for (var k = 0; k < main.length && !cont; k++) { var c = main[(start + k) % main.length]; if (!state.done[c.id]) cont = c; }
-    var h = '<div class="stack-lg"><div class="stack" style="gap:4px"><div class="eyebrow">Ретрит дома · Белые скалы</div><h1>Здравствуйте!</h1></div>' +
+    var h = '<div class="stack-lg"><div class="stack" style="gap:4px"><div class="eyebrow">7 шагов к любви · ретрит дома</div><h1>Здравствуйте!</h1><a href="#/about" style="color:var(--accent);font-weight:700;font-size:17px;text-decoration:none">О ретрите и как его проходить →</a></div>' +
       '<div class="card stack" style="gap:10px"><div class="muted" style="font-size:17px">Пройдено <b style="color:var(--ink)">' + cnt + ' из ' + main.length + '</b> ' + plural(main.length, "урока", "уроков", "уроков") + '</div>' +
       '<div class="bar" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + pct + '%"></i></div></div>';
     if (cont) h += '<div class="cont"><div class="eyebrow">' + (cnt ? "Продолжить с того места" : "Начните отсюда") + '</div>' +
@@ -147,7 +157,7 @@
   }
 
   function noAccess() {
-    return '<div class="stack-lg" style="padding-top:24px"><div class="eyebrow">Ретрит дома · Белые скалы</div><h1>Доступ открывается после оплаты</h1>' +
+    return '<div class="stack-lg" style="padding-top:24px"><div class="eyebrow">7 шагов к любви · ретрит дома</div><h1>Доступ открывается после оплаты</h1>' +
       '<p>Если вы уже оплатили, проверьте, что вступили в закрытый канал ретрита, и откройте приложение заново из него.</p>' +
       (CFG.buyUrl ? '<a class="btn btn-primary" href="' + esc(CFG.buyUrl) + '">Купить ретрит</a>' : '') + '</div>';
   }
@@ -159,10 +169,11 @@
     if (!state.access) html = noAccess();
     else if (r[0] === "m") html = module(decodeURIComponent(r[1] || ""));
     else if (r[0] === "l") html = lesson(decodeURIComponent(r[1] || ""));
+    else if (r[0] === "about") html = intro(false);
     else html = state.seen ? home() : welcome();
     app.innerHTML = html;
     window.scrollTo(0, 0);
-    if (tg && tg.BackButton) { if (r[0] === "m" || r[0] === "l") tg.BackButton.show(); else tg.BackButton.hide(); }
+    if (tg && tg.BackButton) { if (r[0] === "m" || r[0] === "l" || r[0] === "about") tg.BackButton.show(); else tg.BackButton.hide(); }
   }
 
   app.addEventListener("click", function (e) {
